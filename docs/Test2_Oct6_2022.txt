@@ -1,0 +1,138 @@
+
+1. Create a function to sum the squares of odd integers from 1 to max_value
+Answer:
+
+public static int sumOfOddSquares( int maxValue){
+ int sumOfOddSquares = 0;
+for ( int i =1; i<=maxValue; i+=2){
+  sumOfOddSquares = sumOfOddSquares + (i*i);
+}
+return sumOfOddSquares;
+}
+ 
+
+2. Create a function to compare two dictionaries {string:int} to see if they have matching key/values
+Answer:
+
+public static boolean compareDicts(Map<String, Integer> d1, Map<String, Integer> d2){
+  if( d1 == d2 ){
+    return true;
+  }
+  if( d1 == null && d2 != null ){
+    if( d2.isEmpty()){
+      return true;
+    }else {
+       return false;
+     }  
+  }
+  if( d2 == null && d1 != null ){
+    if( d1.isEmpty()){
+      return true;
+    }else {
+       return false;
+     }  
+  }
+  if( d1.size() != d2.size()){
+    return false;
+  }
+
+  Set<String> d1KeySet = d1.keySet();
+  for(String d1Key: d1KeySet){
+    Integer d1Val = d1.get(d1Key);
+    Integer d2Val = d2.get(d1Key);
+    if( d1Val != d2Val ) {
+       return false;
+    }
+  }
+  return true;
+}
+
+3. Given the following tables , write a query that returns {emp_id and name} for all employees without address
+
+Answer: 
+select e.emp_id, e.name from employee e where not exists (select 1 from address a where a.emp_id = e.emp_id);
+
+4. Given two tables (employee and department) , write a query that returns 2nd highest salary for each department{emp_id , emp_name , 2nd_highest_salary, dept_name}
+
+Answer:
+select e.emp_id, e.name as emp_name, e.salary as 2nd_highest_salary, d.name as dept_name from employee as e, department as d where e.dept_id = d.dept_id and e.salary = (select max(b.salary) from employee b where b.dept_id = e.dept_id and b.salary < (select max(a.salary) from employee a where a.dept_id = b.dept_id group by a.dept_id )) order by e.dept_id;
+
+5(EC1): Create a function that counts the number of occurrences of each word in a string, ordered by most common
+Answer:
+
+public class WordCountTuple{
+  private String word;
+  private int count;
+
+  public WordCountTuple(String word){
+    this.word = word;
+    this.count = 1;
+  }
+  public WordCountTuple(String word, int count){
+    this.word = word;
+    this.count = count;
+  }
+  public void incrementCount(){
+    count++;
+  }
+  public String getWord(){
+    return word;
+  }
+  public int getCount(){
+    return count;
+  }
+  pubic String toString(){
+    return "(\"" + word + "\", "  + count + ")";
+}
+
+public static List<WordCountTuple> countWords ( String sentence) {
+  Map<String , WorkdCountTuple> wordVsCount = new HashMap<>();
+  List<WordCountTuple> sortedList = new ArrayList<>();
+  if( sentence == null || sentence.isBlank()){
+    return sortedList;
+  }
+  String[] words = sentence.split("[\\s,']+");
+  for(String word: words){
+  {
+    String lowerWord = word.toLowerCase();
+    WordCountTuple tuple = wordVsCount.get(lowerWord);
+    if( tuple == null ){
+      tuple = new WordCountTuple(lowerWord);
+      sortedList.add(tuple);
+      wordVsCount.put(lowerWord, tuple);
+    }else{
+       tuple.incrementCount();
+    }
+  }
+  sortedList.sort(new Comparator<WordCountTuple>(){
+    public int compare(WordCountTuple o1, WordCountTuple o2){
+      if( o1 == o2){
+         return 0;
+      }
+      if( o1 == null && o2 != null ){
+        return -1;
+      }
+      if( o2 == null && o1 != null ){
+        return 1;
+      }
+      return o2.getCount() - o1.getCount();
+    }
+  });
+  return sortedList;
+}
+
+
+6(EC2): Using the following tables , write a query that returns {emp_id, name, count_of_direct_reports} for each manager
+Answer:
+select e.emp_id, e.name, e1.empcnt as count_of_direct_reports from employee e, (select manager_id, count(*) as empcnt from employee group by manager_id) e1 where e.emp_id = e1.manager_id;
+
+
+
+
+
+
+
+
+
+
+
