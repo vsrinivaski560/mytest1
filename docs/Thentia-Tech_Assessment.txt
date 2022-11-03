@@ -1,0 +1,257 @@
+
+1. How comfortable are you in a start-up envirnment
+Ans: I am confortable in a startup environment, I have worked on the POC development in startup mode of development
+
+2. What is your specific experience with Javascript and NoSQL databases?
+Ans:  Yes, I have experience in javascript and NoSQL  , I have used JQuery and Javascript for the client side validations and the auto filling of the UI options for some of the fields. I have worked on MongoDB 
+
+3. What is your experience with Asynchronous programming in Javascrip and Java?
+Ans: I have used the Asynchronous programming using Java with multi threading and tasks which uses the task handling in the backend and provide the task id to track the status and provide the APIs to get the status of the tasks.  I have worked on the javascrip asynchronous handling for the request handling to the server from UI using the REST calls 
+
+4. If needed, how would you go about designing scalable applications? Walk us through your process.
+Ans:  Scalable applications mainly involves how you can horizontally scale and vertically scale , if additional load can be handled by addition additional server/app resources , and how load balancing can be done , how fault tolerance can be achieved. how the shared resources can be accessed including the databases/other shared resources.  How the Synchronous handling can be done if there are some critical resources to be used how can we maximize the usage and scale with parallelism if it can be.  These are the main factors 
+
+5. If you encounter a difficult problem at work, that you cannot solve, how would you go about getting it done?
+Ans: I will go extra mile to get the details and root of the problem, and i will try to find who is expert in the team  who has already worked in the similar/same domain and technology,  I will involve people in the brainstorm and advanced debuging with meetings scheduled.  and also update to the scrum master and manager about the difficulty level of the problem so that will be able to get the additional support required. Continue to solve the problem without giveup. 
+
+6. What do you think are your weaknesses?
+Ans:  When difficult issues comes , I will go extra mile which sometimes I will keep the personal life might get imbalanced. Of course once i realize it , i will manage the things by discussing with the manager. 
+
+
+
+
+1) Please build a function that takes in the array of edges, construct the entire tree and return the root node 1. 
+Some important points to note:
+* 1 is the root node
+* There is no duplicated edge
+* There is no isolated node
+* Thus N nodes, n-1 edges
+* Positions in the tuple do not indicate direction
+
+Simple Tree node class :
+Node{
+   int value;
+   List<Node> children;
+}
+
+Example1:
+
+Example2:
+
+
+
+
+
+
+Ans:
+
+package com.mytest.nov3;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Node {
+
+	
+	private int value;
+	private List<Node> children;
+	
+	public Node(int val) {
+		this.value = val;
+		children = new ArrayList<Node>();
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public List<Node> getChildren() {
+		return children;
+	}
+
+	public void addChild(int childVal) {
+		Node childNode = new Node(childVal);
+		addChild(childNode);
+	}
+
+	public void addChild(Node childNode) {
+		children.add(childNode);
+	}
+	
+	@Override
+	public String toString() {
+		StringWriter stringWriter = new StringWriter(1024);
+		PrintWriter pr = new PrintWriter(stringWriter);
+		pr.println( getValue());
+		printTree(pr, 1);
+		pr.flush();
+		return stringWriter.toString();
+	}
+	
+	public void printTree(PrintWriter pr, int level) {
+		StringBuilder prefix = new StringBuilder("");
+		for(int i=0; i<level; i++) {
+			prefix.append("--");
+		}
+		for(Node childNode:children) {
+			pr.println(prefix.toString() + childNode.getValue());
+			childNode.printTree(pr, level+1);
+		}
+	}
+}
+
+
+
+
+package com.mytest.nov3;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+public class MyTreeBuilder {
+
+	public static Node buildTree(int[][] edges) {
+
+		Node rootNode = null;
+		List<int[]> edgesList = new ArrayList<int[]>();
+
+		Map<Integer, Node> nodesMap = new HashMap<Integer, Node>();
+		Map<Integer, Node> connectedNodesMap = new HashMap<Integer, Node>();
+		Map<Integer, Integer> arcsMap = new HashMap<Integer, Integer>();
+
+		for (int i = 0; i < edges.length; i++) {
+			edgesList.add(edges[i]);
+		}
+
+		for (int i = 0; i < edges.length; i++) {
+			Node firstNode = connectedNodesMap.get(edges[i][0]);
+			Node secondNode = connectedNodesMap.get(edges[i][1]);
+			if (edges[i][0] == 1 || edges[i][1] == 1) {
+				if (firstNode == null) {
+					firstNode = new Node(edges[i][0]);
+					nodesMap.put(firstNode.getValue(), firstNode);
+				}
+
+				if (secondNode == null) {
+					secondNode = new Node(edges[i][1]);
+					nodesMap.put(secondNode.getValue(), secondNode);
+				}
+			}
+
+			if (edges[i][0] == 1) {
+				firstNode.addChild(secondNode);
+				arcsMap.put(firstNode.getValue(), secondNode.getValue());
+				rootNode = firstNode;
+				connectedNodesMap.put(firstNode.getValue(), firstNode);
+				connectedNodesMap.put(secondNode.getValue(), secondNode);
+				edgesList.remove(edges[i]);
+			} else if (edges[i][1] == 1) {
+
+				secondNode.addChild(firstNode);
+				arcsMap.put(secondNode.getValue(), firstNode.getValue());
+				rootNode = secondNode;
+				connectedNodesMap.put(firstNode.getValue(), firstNode);
+				connectedNodesMap.put(secondNode.getValue(), secondNode);
+				edgesList.remove(edges[i]);
+			}
+		}
+
+		int prevSize = -1;
+		while (edgesList.size() != 0) {
+			if (edgesList.size() == prevSize) {
+				throw new RuntimeException(
+						"It is not converging to the single tree, there would be disjoint edges present");
+			}
+			prevSize = edgesList.size();
+			Iterator<int[]> iterator = edgesList.iterator();
+			while (iterator.hasNext()) {
+				int[] edge = iterator.next();
+				Node firstNode = connectedNodesMap.get(edge[0]);
+				Node secondNode = connectedNodesMap.get(edge[1]);
+
+				if (firstNode != null && secondNode != null
+						&& ((arcsMap.get(firstNode.getValue()) != null
+								&& arcsMap.get(firstNode.getValue()) == secondNode.getValue())
+								|| (arcsMap.get(secondNode.getValue()) != null
+										&& arcsMap.get(secondNode.getValue()) == firstNode.getValue()))) {
+					throw new RuntimeException("Duplicate edges encountered {" + edge[0] + " , " + edge[1] + " }");
+				} else if (firstNode != null) {
+					secondNode = new Node(edge[1]);
+					firstNode.addChild(secondNode);
+					connectedNodesMap.put(secondNode.getValue(), secondNode);
+					iterator.remove();
+				} else if (secondNode != null) {
+					firstNode = new Node(edge[0]);
+					secondNode.addChild(firstNode);
+					connectedNodesMap.put(firstNode.getValue(), firstNode);
+					iterator.remove();
+				}
+			}
+
+		}
+		return rootNode;
+	}
+
+}
+
+
+
+
+package com.mytest.nov3;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+public class MyTreeBuilderTest {
+
+	@Test
+	public void simpleTreeBuildTest() {
+		Node rootNode = MyTreeBuilder.buildTree(new int[][] {{4, 5},{5,3}, {1,5}, {2,1}});
+		assertNotNull(rootNode);
+		assertEquals(1, rootNode.getValue());
+		List<Node> firstChilds = rootNode.getChildren();
+		assertNotNull(firstChilds);
+		assertEquals(2, firstChilds.size());
+		System.out.println(rootNode);
+	}
+	
+	@Test
+	public void simpleTreeBuildTest2() {
+		Node rootNode = MyTreeBuilder.buildTree(new int[][] {{4, 5},{5,3}, {1,5}, {2,5}});
+		assertNotNull(rootNode);
+		assertEquals(1, rootNode.getValue());
+		List<Node> firstChilds = rootNode.getChildren();
+		assertNotNull(firstChilds);
+		assertEquals(1, firstChilds.size());
+		System.out.println(rootNode);
+	}
+	
+	@Test
+	public void simpleTreeBuildTest3() {
+		Node rootNode = MyTreeBuilder.buildTree(new int[][] {{4, 5},{4,3}, {1,4}, {2,1}, {4, 2}, {2, 7}});
+		assertNotNull(rootNode);
+		assertEquals(1, rootNode.getValue());
+		List<Node> firstChilds = rootNode.getChildren();
+		assertNotNull(firstChilds);
+		assertEquals(2, firstChilds.size());
+		System.out.println(rootNode);
+	}
+	
+}
+
+
+
+
+
+
